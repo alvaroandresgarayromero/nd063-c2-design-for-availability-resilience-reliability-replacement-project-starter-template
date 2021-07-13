@@ -1,0 +1,40 @@
+1. Minimum RTO for a single AZ outage
+
+According to AWS RDS Documentation, "Amazon RDS automatically provisions and maintains a synchronous standby replica in a different Availability Zone" "The time it takes for the failover to complete depends on the database activity and other conditions at the time the primary DB instance became unavailable. Failover times are typically 60–120 seconds."
+"Amazon RDS handles failovers automatically so you can resume database operations as quickly as possible without administrative intervention" "The DB instance switches over automatically to the standby replica"
+
+Therefore, the RDS in a high-availability zone has a recovery time objective of 60-120 seconds
+
+
+2. Minimum RTO for a single region outage
+
+There are two types of DR strategies: snapshot and restore, and continous replication.
+- Snapshot and restore "can take hours to complete..." since this involves copying the snapshot to the other RDS region. Also, the execution of this can be done manually or automated with AWS lambda and Amazon CloudWatch Events. 
+- Continous Replication: AWS RDS for SQL server utilizes AWS Database Migration Service (AWS DMS) to do continous replication. This can create near-zero RTO, but for additional cost.
+
+
+This scenario doesn't use continous replication. It uses read replicas, which is similar to snapshot and restore. "When you create a Read Replica, Amazon RDS first takes a snapshot of the source DB instance, and then creates a read-only instance. Amazon RDS then uses the asynchronous replication method of the DB engine to update the Read Replica whenever there is a change made on the source DB instance...If the source DB instance fails, you can promote your Read Replica to a standalone source serve"
+ 
+Therefore, for this case, the RTO consists of a manual interventation to promote the secondary replica. This can take 10 minutes for a manual configuration, and an additional 20 minutes for AWS to complete the update. So a total of 30 minutes. 
+
+3. Minimum RPO for a single AZ outage
+
+The amount of data loss can be between 60-120 seconds as AWS RDS transitions from the primary AZ to the secondary AZ. 
+
+
+4. Minimum RPO for a single region outage
+
+- Snapshot and restore: "RDS uploads transaction logs for DB instances to Amazon S3 every 5 minutes"
+
+The loss of data can be between 10-20 minutes due to the latency, promoting the replica database, and manual configuration intervation. 
+
+
+
+References:
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html
+
+https://aws.amazon.com/blogs/database/cross-region-disaster-recovery-of-amazon-rds-for-sql-server/#:~:text=AWS%20provides%20you%20with%20the,replicates%20data%20synchronously%20across%20AZs.
+
+https://aws.amazon.com/blogs/database/implementing-a-disaster-recovery-strategy-with-amazon-rds/
+
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html
