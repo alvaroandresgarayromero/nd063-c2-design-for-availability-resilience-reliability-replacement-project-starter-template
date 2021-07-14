@@ -15,7 +15,16 @@ There are two types of DR strategies: snapshot and restore, and continous replic
 
 This scenario doesn't use continous replication. It uses read replicas, which is similar to snapshot and restore. "When you create a Read Replica, Amazon RDS first takes a snapshot of the source DB instance, and then creates a read-only instance. Amazon RDS then uses the asynchronous replication method of the DB engine to update the Read Replica whenever there is a change made on the source DB instance...If the source DB instance fails, you can promote your Read Replica to a standalone source serve"
  
-Therefore, for this case, the RTO consists of a manual interventation to promote the secondary replica. This can take 10 minutes for a manual configuration, and an additional 20 minutes for AWS to complete the update. So a total of 30 minutes. 
+Therefore, for this case, the RTO consists of a manual interventation to promote the secondary replica as shown below:
+
+- Problem happens (0 minutes)
+- Time before the alert triggers (5 minutes)
+- Alert triggers on-all staff (1 minute)
+- On-call staff may need to get out of bed, get to computer, log in, and log onto VPN (10 minutes)
+- On-call staff starts diagnosing issue (10 minutes)
+- Root cause is discovered (15 minutes)
+- Remedation started: manual config (10 minutes)
+- Remedation completed: AWS completes update (20 minutes)
 
 3. Minimum RPO for a single AZ outage
 
@@ -26,9 +35,16 @@ The amount of data loss can be between 60-120 seconds as AWS RDS transitions fro
 
 - Snapshot and restore: "RDS uploads transaction logs for DB instances to Amazon S3 every 5 minutes"
 
-The loss of data can be between 10-20 minutes due to the latency, promoting the replica database, and manual configuration intervation. 
+The loss of data can be described as shown below:
 
-
+- Problem happens (0 minutes)
+- Time before the alert triggers (5 minutes)
+- Alert triggers on-all staff (1 minute)
+- On-call staff may need to get out of bed, get to computer, log in, and log onto VPN (10 minutes)
+- On-call staff starts diagnosing issue (10 minutes)
+- Root cause is discovered (15 minutes)
+- Remedation started: latency and manual intervation to promote database replica (15 minutes)
+- Remedation completed: AWS completes the update (10 minutes)
 
 References:
 https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html
